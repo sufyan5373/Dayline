@@ -231,6 +231,16 @@ textarea{resize:vertical;min-height:110px}
 .logl time{color:var(--muted);flex:none;width:64px;font-variant-numeric:tabular-nums}
 .fine{font-size:12px;color:var(--muted);margin-top:16px}
 
+/* sync + swipe */
+.codebox{font:600 clamp(22px,7vw,30px)/1.2 var(--f-display);letter-spacing:.08em;background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;text-align:center;user-select:all;-webkit-user-select:all;margin-bottom:10px}
+#view{touch-action:pan-y}
+@media (prefers-reduced-motion:no-preference){
+  #view.sl-next{animation:slnext .24s ease-out}
+  #view.sl-prev{animation:slprev .24s ease-out}
+  @keyframes slnext{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes slprev{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
+}
+
 /* toasts */
 #toasts{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:80;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -337,12 +347,99 @@ function seed(){
   return {v:1,plans:plans,habits:habits,goals:goals,subjects:[phys,chem,math],classes:classes,settings:{},log:[],fired:{}};
 }
 function load(){try{var r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function saveQuiet(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){S.updatedAt=Date.now();saveQuiet();if(typeof schedulePush==='function')schedulePush()}
 var S=load();
-if(!S||!S.plans){S=seed();save()}
+if(!S||!S.plans){S=seed();S.updatedAt=Date.now();saveQuiet()}
 S.settings=Object.assign({city:'',nagMin:60,quiet:true,qStart:'23:00',qEnd:'07:00',sound:true,hideNotice:false,hideSample:false},S.settings||{});
-S.log=S.log||[];S.fired=S.fired||{};
+S.log=S.log||[];S.fired=S.fired||{};S.updatedAt=S.updatedAt||0;
 ['plans','habits','goals','subjects','classes'].forEach(function(k){S[k]=S[k]||[]});
+
+/* ---------- cross-device sync (code based, last change wins) ---------- */
+var SYKEY='dayline.sync',SYNC_KEYS=['plans','habits','goals','subjects','classes'];
+var SY=(function(){try{return JSON.parse(localStorage.getItem(SYKEY))||{}}catch(e){return {}}})();
+SY.status=SY.code?'idle':'off';
+var syBusy=false,syTimer=null,syPending=false,syDirty=false;
+function saveSY(){try{localStorage.setItem(SYKEY,JSON.stringify({code:SY.code||'',last:SY.last||0}))}catch(e){}}
+function newCode(){
+  var A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',out='',b=new Uint8Array(12);
+  (window.crypto||window.msCrypto).getRandomValues(b);
+  for(var i=0;i<12;i++){out+=A[b[i]%A.length];if(i%4===3&&i<11)out+='-'}
+  return out;
+}
+function normCode(c){return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function prettyCode(c){var n=normCode(c);return n.replace(/(.{4})(?=.)/g,'$1-')}
+async function codeId(c){
+  var n=normCode(c);
+  try{
+    var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('dayline:'+n));
+    return Array.prototype.map.call(new Uint8Array(buf),function(x){return pad(x.toString(16)).slice(-2)}).join('');
+  }catch(e){return 'x'+n.toLowerCase()+'xxxxxxxxxxxxxxxx'}
+}
+function snapshot(){var o={updatedAt:S.updatedAt};SYNC_KEYS.forEach(function(k){o[k]=S[k]});return o}
+function applyRemote(d,ts){
+  SYNC_KEYS.forEach(function(k){S[k]=Array.isArray(d[k])?d[k]:[]});
+  S.updatedAt=ts;saveQuiet();
+  if(U&&U.openSubj&&S.subjects.length&&!S.subjects.some(function(s){return U.openSubj.has(s.id)}))U.openSubj=new Set([S.subjects[0].id]);
+}
+async function api(body){
+  var r=await fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('http '+r.status);
+  return r.json();
+}
+/* One round trip: pushes local data if it is newer, pulls remote data if it is newer. */
+async function syncNow(opts){
+  opts=opts||{};
+  if(!SY.code||syBusy){if(syBusy)syPending=true;return}
+  if(U&&U.sheet&&U.sheet.kind!=='reminders'&&!opts.force){syPending=true;return}
+  syBusy=true;SY.status='syncing';
+  try{
+    var id=await codeId(SY.code);
+    var res=await api({id:id,updatedAt:S.updatedAt,data:snapshot()});
+    if(res.data&&res.updatedAt>S.updatedAt){applyRemote(res.data,res.updatedAt);render()}
+    SY.last=Date.now();SY.status='ok';saveSY();
+  }catch(e){SY.status=navigator.onLine===false?'offline':'error'}
+  syBusy=false;
+  refreshSyncUI();
+  if(syPending){syPending=false;schedulePush(800)}
+}
+function schedulePush(ms){
+  if(!SY||!SY.code)return;
+  clearTimeout(syTimer);syTimer=setTimeout(function(){syncNow()},ms==null?1200:ms);
+}
+function syncLabel(){
+  if(!SY.code)return '';
+  if(SY.status==='syncing')return 'Syncing…';
+  if(SY.status==='offline')return 'Offline. Will sync when you are back online.';
+  if(SY.status==='error')return 'Could not reach the sync server. Will retry.';
+  return SY.last?'Last synced '+fmtTime(hmOf(SY.last)):'Connected';
+}
+function refreshSyncUI(){var el=$('#sync-status');if(el)el.textContent=syncLabel();var dot=$('#bell .st');if(dot&&SY.code&&SY.status==='error')dot.className='st'}
+async function syncCreate(){
+  var code=newCode(),id=await codeId(code);
+  S.updatedAt=Date.now();saveQuiet();
+  try{
+    await api({id:id,updatedAt:S.updatedAt,data:snapshot()});
+    SY.code=code;SY.last=Date.now();SY.status='ok';saveSY();
+    toast({title:'Sync is on',body:'Enter this code on your other devices.'});
+  }catch(e){toast({title:'Could not create a code',body:'The sync server is not reachable. Check that /api/sync is deployed.'})}
+  openReminders();
+}
+async function syncJoin(raw){
+  var n=normCode(raw);
+  if(n.length!==12){toast({title:'Check the code',body:'A code has 12 letters and numbers.'});return}
+  try{
+    var id=await codeId(n),res=await api({id:id,updatedAt:0,data:null});
+    if(!res.data){toast({title:'Code not found',body:'Check it and try again.'});return}
+    applyRemote(res.data,res.updatedAt);
+    SY.code=prettyCode(n);SY.last=Date.now();SY.status='ok';saveSY();
+    closeSheet();render();
+    toast({title:'Connected',body:'Showing the data for this code. Changes now sync both ways.'});
+  }catch(e){toast({title:'Could not connect',body:'The sync server is not reachable.'})}
+}
+function syncOff(){SY.code='';SY.last=0;SY.status='off';saveSY();openReminders();toast({title:'Sync turned off',body:'Data stays on this device.'})}
+setInterval(function(){if(SY.code&&!document.hidden)syncNow()},15000);
+window.addEventListener('online',function(){syncNow()});
 
 var nd0=new Date();
 var U={view:'today',month:{y:nd0.getFullYear(),m:nd0.getMonth()},sel:ymd(nd0),ttDay:dowIdx(nd0),
@@ -475,7 +572,7 @@ function tick(){
   if(due.length)fireDue(due);
   updateClock(nd);
   var mk=hm;
-  if(changed)save();
+  if(changed)saveQuiet();
   if(changed||(mk!==U.lastMin&&U.view==='today')){U.lastMin=mk;render()}else U.lastMin=mk;
 }
 
@@ -657,10 +754,13 @@ function render(){
   var st=$('#bell .st');if(st)st.className='st'+(nstate()==='granted'?' ok':'');
   if(sig){var els=$$('[data-a]',view);for(var i=0;i<els.length;i++){if(sigOf(els[i])===sig&&els[i].tagName==='BUTTON'){els[i].focus({preventScroll:true});break}}}
 }
-function go(v){
+function go(v,dir){
+  var old=VIEWS.indexOf(U.view);
+  if(!dir)dir=VIEWS.indexOf(v)>old?'next':'prev';
   U.view=v;
   try{if(location.hash!=='#'+v)location.hash=v}catch(e){}
   render();window.scrollTo(0,0);
+  var vw=$('#view');vw.classList.remove('sl-next','sl-prev');void vw.offsetWidth;vw.classList.add('sl-'+dir);
   var a=$('.nav .pill[aria-current="page"]');if(a&&a.scrollIntoView)a.scrollIntoView({inline:'nearest',block:'nearest'});
 }
 
@@ -729,6 +829,22 @@ function closeSheet(){
   var lf=U.lastFocus;U.lastFocus=null;
   if(lf&&document.contains(lf)&&lf.focus){try{lf.focus({preventScroll:true})}catch(e){}}
 }
+function syncHTML(){
+  var h='<h3>Sync across devices</h3>';
+  if(SY.code){
+    h+='<p class="stat-line">Enter this code on any device to see and edit the same data. Keep it private, anyone with the code can see your plans.</p>'
+      +'<div class="codebox" id="sync-code" aria-label="Your sync code">'+esc(SY.code)+'</div>'
+      +'<p class="stat-line" id="sync-status" role="status">'+esc(syncLabel())+'</p>'
+      +'<div class="foot" style="margin-top:0"><button class="btn-ghost" type="button" data-a="sync-copy">Copy code</button><button class="btn-ghost" type="button" data-a="sync-now">Sync now</button><button class="btn-ghost danger" type="button" data-a="sync-off">Turn off</button></div>';
+  }else{
+    h+='<p class="stat-line">Get a code here, then enter it on your other devices. Changes on any device show up on the others.</p>'
+      +'<div class="foot" style="margin-top:0"><button class="btn-solid" type="button" data-a="sync-create">Create sync code</button></div>'
+      +'<div class="fields" style="margin-top:14px"><label class="f">Already have a code?<input id="set-code" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>'
+      +'<div><button class="btn-ghost" type="button" data-a="sync-join">Connect and load that data</button></div></div>'
+      +'<p class="fine">Connecting replaces the data on this device with the data for that code.</p>';
+  }
+  return h;
+}
 function openReminders(){
   var s=nstate(),st=S.settings,msg,btn='';
   if(s==='granted')msg='Notifications are on. Each reminder also appears inside Dayline.';
@@ -739,6 +855,7 @@ function openReminders(){
   U.sheet={kind:'reminders'};
   if(!U.lastFocus)U.lastFocus=document.activeElement;
   scrim.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><h2 id="sheet-title">Reminders</h2><p class="stat-line">'+msg+'</p>'+btn
+    +syncHTML()
     +'<h3>Location</h3><div class="fields"><label class="f">City shown next to the clock<input id="set-city" type="text" data-set="city" value="'+esc(st.city||'')+'" placeholder="Islamabad"></label></div>'
     +'<h3>Nudges</h3><div class="fields"><div class="fg"><label class="f">Repeat until done<select id="set-nag" data-set="nagMin">'
     +[15,30,60,120].map(function(n){return '<option value="'+n+'"'+(st.nagMin===n?' selected':'')+'>'+(n===60?'Every hour':n===120?'Every 2 hours':'Every '+n+' min')+'</option>'}).join('')+'</select></label>'
@@ -848,6 +965,14 @@ document.addEventListener('click',function(e){
     save();render();if(U.sheet&&U.sheet.kind==='reminders')openReminders();toast({title:'Examples cleared'});
   }
   else if(a==='test-notif')notify('Dayline test reminder','If you can see this, reminders are working.');
+  else if(a==='sync-create')syncCreate();
+  else if(a==='sync-join'){var ci=$('#set-code');syncJoin(ci?ci.value:'')}
+  else if(a==='sync-copy'){
+    var cd=SY.code||'';
+    (navigator.clipboard?navigator.clipboard.writeText(cd):Promise.reject()).then(function(){toast({title:'Code copied'})},function(){var r=document.createRange();r.selectNodeContents($('#sync-code'));var sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast({title:'Code selected',body:'Press copy.'})});
+  }
+  else if(a==='sync-now'){syncNow({force:true});toast({title:'Syncing'})}
+  else if(a==='sync-off')syncOff();
   else if(a==='sheet-type')openSheet(d.v);
   else if(a==='close-sheet')closeSheet();
   else if(a==='delete'){
@@ -867,10 +992,34 @@ document.addEventListener('toggle',function(e){
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!scrim.hidden)closeSheet()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 document.addEventListener('pointerdown',function(){try{if(ac&&ac.state==='suspended')ac.resume()}catch(e){}},{passive:true});
+/* swipe left/right between pages */
+(function(){
+  var sx=0,sy=0,st=0,on=false;
+  function blocked(t){return !!(t&&t.closest&&t.closest('.nav,.tabs,input,textarea,select,.scrim,.toast,.sheet'))}
+  document.addEventListener('touchstart',function(e){
+    on=false;
+    if(e.touches.length!==1||!scrim.hidden||blocked(e.target))return;
+    var t=e.touches[0];
+    if(t.clientX<20||t.clientX>window.innerWidth-20)return;
+    sx=t.clientX;sy=t.clientY;st=Date.now();on=true;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!on)return;on=false;
+    var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(Date.now()-st>700||Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5)return;
+    var sel=window.getSelection&&window.getSelection();if(sel&&String(sel).length>0)return;
+    var i=VIEWS.indexOf(U.view),n=dx<0?i+1:i-1;
+    if(n<0||n>=VIEWS.length)return;
+    go(VIEWS[n],dx<0?'next':'prev');
+  },{passive:true});
+  document.addEventListener('touchcancel',function(){on=false},{passive:true});
+})();
+document.addEventListener('visibilitychange',function(){if(!document.hidden)syncNow()});
 window.addEventListener('hashchange',function(){var v=hashView();if(v&&v!==U.view){U.view=v;render()}});
 
 render();
 tick();
+if(SY.code)syncNow();
 setInterval(tick,15000);
 })();
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
