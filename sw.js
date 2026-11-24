@@ -1,5 +1,5 @@
-const CACHE = 'dayline-v3';
-const ASSETS = ['/', '/index.html', '/pdf-viewer.js', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'dayline-v4';
+const ASSETS = ['/', '/index.html', '/pdf-viewer.js', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png', '/icon-maskable-192.png', '/icon-maskable-512.png', '/apple-touch-icon.png'];
 // Viewer libraries, cached ahead of time so PDFs and Word files open with no connection.
 const LIBS = [
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
