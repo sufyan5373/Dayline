@@ -12,6 +12,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22112%22 fill=%22%230B0B0C%22/%3E%3Crect x=%22116%22 y=%22132%22 width=%22280%22 height=%22260%22 rx=%2236%22 fill=%22%23E6E6E2%22/%3E%3Cpath d=%22M116 216V168a36 36 0 0 1 36-36h208a36 36 0 0 1 36 36v48z%22 fill=%22%23E9B45F%22/%3E%3Cpath d=%22M190 304l46 46 90-104%22 fill=%22none%22 stroke=%22%230B0B0C%22 stroke-width=%2228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>try{var __t=JSON.parse(localStorage.getItem('dayline.v1')).settings.theme;if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Dayline Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,8 +242,39 @@ textarea{resize:vertical;min-height:110px}
   @keyframes slprev{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
 }
 
+/* files: notes + past papers */
+.chap{flex-wrap:wrap}
+.chap .cn{background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer;min-height:40px}
+.fcount{display:inline-block;margin-left:8px;min-width:20px;padding:0 6px;border-radius:999px;background:var(--chip);color:var(--chip-ink);font-size:11px;line-height:20px;text-align:center;vertical-align:middle}
+.fchips{flex-basis:100%;display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:0 0 8px 40px}
+.fchips.sf{padding:6px 0 0}
+.fchips .chip{min-height:34px;padding:6px 13px;border-radius:999px;font-size:12.5px}
+.flist{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:8px}
+.fli{display:flex;align-items:center;gap:2px;background:var(--surface-2);border-radius:20px;padding:6px 6px 6px 8px}
+.fi{flex:1;min-width:0;display:flex;align-items:center;gap:12px;background:none;border:0;padding:4px;text-align:left}
+.ftype{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;font:600 11px var(--f-display);letter-spacing:.04em;color:var(--on-card)}
+.fx{display:flex;flex-direction:column;min-width:0;gap:2px}
+.fn{font-weight:600;font-size:14px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fm{font-size:12px;color:var(--muted)}
+.ib{min-width:44px;height:44px;flex:none;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;color:var(--ink);padding:0}
+.ib:hover{background:var(--line)}
+.ib.armed{padding:0 14px;font-size:12px;font-weight:600;color:var(--alert)}
+/* Word reader */
+.dv{position:fixed;inset:0;z-index:2100;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;font-family:var(--f-body)}
+.dv-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.dv-t{flex:1;min-width:0;font:600 15px var(--f-display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 10px calc(40px + env(safe-area-inset-bottom,0px))}
+.dv-page{max-width:780px;margin:0 auto;background:var(--surface);border-radius:22px;padding:22px 20px;font-size:var(--dv-fs,16px);line-height:1.6;overflow-wrap:anywhere}
+.dv-page h1,.dv-page h2,.dv-page h3{font-family:var(--f-display);letter-spacing:-.02em;line-height:1.15;margin:1.1em 0 .4em}
+.dv-page p{margin:0 0 .8em}
+.dv-page img{max-width:100%;height:auto}
+.dv-page table{border-collapse:collapse;display:block;max-width:100%;overflow-x:auto;margin-bottom:1em}
+.dv-page td,.dv-page th{border:1px solid var(--line);padding:6px 9px;vertical-align:top}
+.dv-page a{color:inherit;text-decoration:underline}
+.dv-msg{text-align:center;color:var(--muted);padding:40px 12px}
+
 /* toasts */
-#toasts{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:80;pointer-events:none;
+#toasts{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;flex-direction:column;gap:8px;align-items:center;z-index:2200;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .toast{pointer-events:auto;width:100%;max-width:460px;background:var(--pill-on);color:var(--pill-on-ink);border-radius:18px;padding:12px 8px 12px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28)}
 .toast .tt{display:flex;flex-direction:column;flex:1;min-width:0;font-size:13px}
@@ -272,6 +304,7 @@ textarea{resize:vertical;min-height:110px}
   <footer class="credit">Made by Muhammad Sufyan Sarwar</footer>
 </div>
 <div class="scrim" id="scrim" hidden></div>
+<script src="/pdf-viewer.js"></script>
 
 <script>
 (function(){
@@ -283,6 +316,8 @@ var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
 var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 var DOWL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 var IC={
+  share:'<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 15V4M8 8l4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   check:'<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4.5 10.5l3.8 3.8 7.2-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   plus:'<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
   left:'<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -351,8 +386,17 @@ function saveQuiet(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){S.updatedAt=Date.now();saveQuiet();if(typeof schedulePush==='function')schedulePush()}
 var S=load();
 if(!S||!S.plans){S=seed();S.updatedAt=Date.now();saveQuiet()}
-S.settings=Object.assign({city:'',nagMin:60,quiet:true,qStart:'23:00',qEnd:'07:00',sound:true,hideNotice:false,hideSample:false},S.settings||{});
+S.settings=Object.assign({city:'',nagMin:60,quiet:true,qStart:'23:00',qEnd:'07:00',sound:true,hideNotice:false,hideSample:false,theme:'auto'},S.settings||{});
 S.log=S.log||[];S.fired=S.fired||{};S.updatedAt=S.updatedAt||0;
+function applyTheme(){
+  var t=S.settings.theme||'auto',r=document.documentElement;
+  if(t==='light'||t==='dark')r.setAttribute('data-theme',t);else r.removeAttribute('data-theme');
+  $$('meta[name="theme-color"]').forEach(function(m){
+    if(!m.dataset.o)m.dataset.o=m.getAttribute('content');
+    m.setAttribute('content',t==='light'?'#E6E6E2':t==='dark'?'#0E0E0F':m.dataset.o);
+  });
+}
+applyTheme();
 ['plans','habits','goals','subjects','classes'].forEach(function(k){S[k]=S[k]||[]});
 
 /* ---------- cross-device sync (code based, last change wins) ---------- */
@@ -710,13 +754,13 @@ function subjCard(s){
   return '<details class="card subj c-'+s.color+'" data-sid="'+s.id+'"'+(U.openSubj.has(s.id)?' open':'')+'><summary><div class="head"><h3>'+esc(s.name)+'</h3><span class="tag">'+pct+'%</span></div>'
     +barHTML(pct,s.name+' progress')+'<div class="meta">'+dn+' of '+s.chapters.length+' chapters<span class="more"></span></div></summary>'
     +'<div class="body"><ul class="chaps">'+s.chapters.map(function(c){
-      var pl=chapPlan(s.id,c.id),act='';
+      var pl=chapPlan(s.id,c.id),act='',fo=!!(U.openChap&&U.openChap.has(s.id+':'+c.id)),fn=fileCount(s.id,c.id,'notes')+fileCount(s.id,c.id,'papers');
       if(!c.done)act=pl?'<button class="chip nw" data-a="plan-chap" data-sid="'+s.id+'" data-cid="'+c.id+'" aria-label="Planned '+dLabel(pl.date)+', edit">'+dLabel(pl.date)+'</button>':'<button class="chip ghost nw" data-a="plan-chap" data-sid="'+s.id+'" data-cid="'+c.id+'">Plan it</button>';
-      return '<li class="chap"><button class="sb" data-a="toggle-chap" data-sid="'+s.id+'" data-cid="'+c.id+'" aria-pressed="'+c.done+'" aria-label="Chapter done: '+esc(c.t)+'">'+IC.check+'</button><span class="cn '+(c.done?'strike':'')+'">'+esc(c.t)+'</span>'+act+'</li>';
-    }).join('')+'</ul><div><button class="btn-ghost" data-a="edit-subject" data-id="'+s.id+'">Edit subject</button></div></div></details>';
+      return '<li class="chap"><button class="sb" data-a="toggle-chap" data-sid="'+s.id+'" data-cid="'+c.id+'" aria-pressed="'+c.done+'" aria-label="Chapter done: '+esc(c.t)+'">'+IC.check+'</button><button class="cn '+(c.done?'strike':'')+'" data-a="chap-files" data-sid="'+s.id+'" data-cid="'+c.id+'" aria-expanded="'+fo+'">'+esc(c.t)+(fn?'<span class="fcount">'+fn+'</span>':'')+'</button>'+act+(fo?fchips(s.id,c.id):'')+'</li>';
+    }).join('')+'</ul><div class="fchips sf"><span class="meta">Whole subject</span>'+fchipBtns(s.id,'')+'</div><div><button class="btn-ghost" data-a="edit-subject" data-id="'+s.id+'">Edit subject</button></div></div></details>';
 }
 function viewSyllabus(){
-  var h='<div class="vh"><h1>Syllabus</h1><p>Tick chapters off, or tap Plan it to schedule one with hourly reminders.</p></div>';
+  var h='<div class="vh"><h1>Syllabus</h1><p>Tick chapters off, plan them with reminders, and keep notes and past papers for each one.</p></div>';
   h+=S.subjects.length?'<div class="cards">'+S.subjects.map(subjCard).join('')+'</div>':'<p class="empty">No subjects yet. Tap + and choose Subject.</p>';
   return h;
 }
@@ -745,7 +789,7 @@ function viewTimetable(){
   }).join('')+'</div>':'<p class="empty">No classes on '+DOWL[U.ttDay]+'. Tap + to add one.</p>';
   return h;
 }
-function sigOf(el){return el&&el.dataset?['a','id','i','cid','sid','d','v','dir'].map(function(k){return el.dataset[k]||''}).join('|'):null}
+function sigOf(el){return el&&el.dataset?['a','id','i','cid','sid','d','v','dir','k'].map(function(k){return el.dataset[k]||''}).join('|'):null}
 function render(){
   var view=$('#view'),ae=document.activeElement,sig=(ae&&view.contains(ae))?sigOf(ae):null;
   var fn={today:viewToday,calendar:viewCalendar,goals:viewGoals,syllabus:viewSyllabus,timetable:viewTimetable}[U.view];
@@ -856,6 +900,7 @@ function openReminders(){
   if(!U.lastFocus)U.lastFocus=document.activeElement;
   scrim.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><h2 id="sheet-title">Reminders</h2><p class="stat-line">'+msg+'</p>'+btn
     +syncHTML()
+    +'<h3>Appearance</h3><div class="seg" role="group" aria-label="Theme">'+[['auto','Auto'],['light','Light'],['dark','Dark']].map(function(x){return '<button type="button" class="seg-b" data-a="theme" data-v="'+x[0]+'" aria-pressed="'+((st.theme||'auto')===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'
     +'<h3>Location</h3><div class="fields"><label class="f">City shown next to the clock<input id="set-city" type="text" data-set="city" value="'+esc(st.city||'')+'" placeholder="Islamabad"></label></div>'
     +'<h3>Nudges</h3><div class="fields"><div class="fg"><label class="f">Repeat until done<select id="set-nag" data-set="nagMin">'
     +[15,30,60,120].map(function(n){return '<option value="'+n+'"'+(st.nagMin===n?' selected':'')+'>'+(n===60?'Every hour':n===120?'Every 2 hours':'Every '+n+' min')+'</option>'}).join('')+'</select></label>'
@@ -904,7 +949,7 @@ function saveSheet(){
     var name=val('f-name');
     if(!name)return showErr('Add a subject name.');
     var oc=ex?ex.chapters:[],chs=lines('f-chaps').map(function(t){var o=oc.find(function(c){return c.t===t});return o||{id:uid(),t:t,done:false}});
-    if(ex){ex.name=name;ex.chapters=chs;ex.color=pickedColor();delete ex.sample}
+    if(ex){var keep={};chs.forEach(function(c){keep[c.id]=1});oc.forEach(function(c){if(!keep[c.id])filesDelWhere(function(f){return f.sid===ex.id&&f.cid===c.id})});ex.name=name;ex.chapters=chs;ex.color=pickedColor();delete ex.sample}
     else{var ns={id:uid(),name:name,color:pickedColor(),chapters:chs};S.subjects.push(ns);U.openSubj.add(ns.id)}
   }
   save();closeSheet();render();toast({title:'Saved'});
@@ -915,11 +960,208 @@ function deleteItem(){
   if(k==='habit')S.habits=S.habits.filter(function(x){return x.id!==id});
   if(k==='goal')S.goals=S.goals.filter(function(x){return x.id!==id});
   if(k==='class')S.classes=S.classes.filter(function(x){return x.id!==id});
-  if(k==='subject'){S.subjects=S.subjects.filter(function(x){return x.id!==id});S.plans.forEach(function(p){if(p.chapter&&p.chapter.sid===id)p.chapter=null})}
+  if(k==='subject'){S.subjects=S.subjects.filter(function(x){return x.id!==id});filesDelWhere(function(f){return f.sid===id});S.plans.forEach(function(p){if(p.chapter&&p.chapter.sid===id)p.chapter=null})}
   save();closeSheet();render();toast({title:'Deleted'});
 }
 function defaultKind(){return {today:'plan',calendar:'plan',goals:'goal',syllabus:'subject',timetable:'class'}[U.view]}
 function find(list,id){return S[list].find(function(x){return x.id===id})}
+
+/* ---------- offline files: notes and past papers (stored on this device only) ---------- */
+var FDB=null,FILES=[],urlCache={};
+var MIME={pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',doc:'application/msword'};
+var MAMMOTH='https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js';
+var KLAB={notes:'Notes',papers:'Past papers'};
+function idb(){return new Promise(function(res,rej){
+  var r=indexedDB.open('dayline-files',1);
+  r.onupgradeneeded=function(){var d=r.result;d.createObjectStore('meta',{keyPath:'id'});d.createObjectStore('blobs')};
+  r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)};
+})}
+function tx(stores,mode,fn){return new Promise(function(res,rej){
+  var t=FDB.transaction(stores,mode),rq;
+  t.oncomplete=function(){res(rq&&rq.result)};t.onerror=t.onabort=function(){rej(t.error)};
+  rq=fn(t);
+})}
+function filesInit(){
+  return idb().then(function(d){FDB=d;return tx(['meta'],'readonly',function(t){return t.objectStore('meta').getAll()})})
+    .then(function(l){FILES=l||[]}).catch(function(){});
+}
+function extOf(n){return (String(n).split('.').pop()||'').toLowerCase()}
+function fmtSize(n){return n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB'}
+function fmtAdded(ms){var d=new Date(ms);return d.getDate()+' '+MON[d.getMonth()]}
+function fileCount(sid,cid,k){return FILES.filter(function(f){return f.sid===sid&&f.cid===cid&&f.kind===k}).length}
+function fchipBtns(sid,cid){
+  return ['notes','papers'].map(function(k){
+    var n=fileCount(sid,cid,k);
+    return '<button class="chip nw'+(n?'':' ghost')+'" data-a="files" data-sid="'+sid+'" data-cid="'+cid+'" data-k="'+k+'">'+(n?KLAB[k]+' · '+n:'+ '+KLAB[k])+'</button>';
+  }).join('');
+}
+function fchips(sid,cid){return '<div class="fchips">'+fchipBtns(sid,cid)+'</div>'}
+function fileBlob(id){return tx(['blobs'],'readonly',function(t){return t.objectStore('blobs').get(id)})}
+async function fileAdd(f,sid,cid,kind,ext){
+  if(!FDB)FDB=await idb();
+  var buf=await f.arrayBuffer();
+  var m={id:uid()+uid(),sid:sid,cid:cid,kind:kind,name:f.name,ext:ext,type:MIME[ext],size:f.size,added:Date.now()};
+  await tx(['meta','blobs'],'readwrite',function(t){t.objectStore('meta').put(m);return t.objectStore('blobs').put(new Blob([buf],{type:m.type}),m.id)});
+  FILES.push(m);
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+}
+function dropStored(m){
+  if(urlCache[m.id]){try{URL.revokeObjectURL(urlCache[m.id])}catch(e){}delete urlCache[m.id]}
+  try{localStorage.removeItem('sk_pdf_ann_f:'+m.id);localStorage.removeItem('sk_pdf_last_page_f:'+m.id)}catch(e){}
+  if(FDB)tx(['meta','blobs'],'readwrite',function(t){t.objectStore('meta').delete(m.id);return t.objectStore('blobs').delete(m.id)}).catch(function(){});
+}
+function filesDelWhere(pred){
+  var gone=FILES.filter(pred);if(!gone.length)return;
+  FILES=FILES.filter(function(f){return !pred(f)});
+  gone.forEach(dropStored);
+}
+var chapT={};
+function armChap(ck){
+  clearTimeout(chapT[ck]);
+  chapT[ck]=setTimeout(function(){
+    if(!scrim.hidden){armChap(ck);return}
+    if(U.openChap)U.openChap.delete(ck);
+    delete chapT[ck];render();
+  },5000);
+}
+function toggleChap(ck){
+  U.openChap=U.openChap||new Set();
+  if(U.openChap.has(ck)){U.openChap.delete(ck);clearTimeout(chapT[ck])}
+  else{U.openChap.add(ck);armChap(ck)}
+  render();
+}
+function fileItem(f){
+  return '<li class="fli"><button class="fi" data-a="file-open" data-id="'+f.id+'"><span class="ftype '+(f.ext==='pdf'?'c-rose':'c-lav')+'">'+esc(f.ext.toUpperCase())+'</span><span class="fx"><span class="fn">'+esc(f.name)+'</span><span class="fm">'+fmtSize(f.size)+' · Added '+fmtAdded(f.added)+'</span></span></button>'
+    +'<button class="ib" data-a="file-share" data-id="'+f.id+'" aria-label="Share '+esc(f.name)+'">'+IC.share+'</button>'
+    +'<button class="ib" data-a="file-del" data-id="'+f.id+'" aria-label="Delete '+esc(f.name)+'">'+IC.trash+'</button></li>';
+}
+function openFiles(sid,cid,kind){
+  var s=find('subjects',sid);if(!s)return;
+  var ch=cid?s.chapters.find(function(c){return c.id===cid}):null;
+  if(!ch)cid='';
+  kind=kind==='papers'?'papers':'notes';
+  U.sheet={kind:'files',sid:sid,cid:cid,fk:kind};
+  if(!U.lastFocus)U.lastFocus=document.activeElement;
+  var list=FILES.filter(function(f){return f.sid===sid&&f.cid===cid&&f.kind===kind}).sort(function(a,b){return b.added-a.added});
+  var tabs='<div class="seg" role="group" aria-label="File type">'+['notes','papers'].map(function(k){
+    var n=fileCount(sid,cid,k);
+    return '<button type="button" class="seg-b" data-a="files-tab" data-k="'+k+'" aria-pressed="'+(k===kind)+'">'+KLAB[k]+(n?' · '+n:'')+'</button>';
+  }).join('')+'</div>';
+  var what=kind==='notes'?'notes':'past papers';
+  scrim.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><h2 id="sheet-title">'+esc(ch?ch.t:s.name)+'</h2><p class="stat-line">'+esc(ch?s.name:'Whole subject')+'</p>'+tabs
+    +(list.length?'<ul class="flist">'+list.map(fileItem).join('')+'</ul>':'<p class="empty">No '+what+' here yet. Add PDF or Word files from your device.</p>')
+    +'<div class="foot"><button class="btn-solid" type="button" data-a="file-add">Add '+what+'</button><button class="btn-ghost" type="button" data-a="close-sheet">Done</button></div>'
+    +'<p class="fine">Files stay on this device and work offline. They are never uploaded or synced.</p></div>';
+  scrim.hidden=false;
+}
+function addFilesPrompt(){
+  var sh=U.sheet;if(!sh||sh.kind!=='files')return;
+  var inp=document.createElement('input');
+  inp.type='file';inp.multiple=true;
+  inp.accept='.pdf,.docx,.doc,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  inp.onchange=function(){addFiles(Array.prototype.slice.call(inp.files||[]),sh.sid,sh.cid,sh.fk)};
+  inp.click();
+}
+async function addFiles(files,sid,cid,kind){
+  var ok=0,bad=0,failed=false;
+  for(var i=0;i<files.length;i++){
+    var ext=extOf(files[i].name);
+    if(!MIME[ext]){bad++;continue}
+    try{await fileAdd(files[i],sid,cid,kind,ext);ok++}catch(e){failed=true;break}
+  }
+  render();
+  if(U.sheet&&U.sheet.kind==='files'&&U.sheet.sid===sid&&U.sheet.cid===cid)openFiles(sid,cid,kind);
+  if(failed)toast({title:'Could not save the file',body:'This browser blocked offline storage or it is full.'});
+  else if(ok)toast({title:ok===1?'File added':ok+' files added',body:bad?bad+' skipped. Only PDF and Word files can be added.':'Saved on this device. Works offline.'});
+  else if(bad)toast({title:'Only PDF and Word files',body:'Pick a .pdf, .docx or .doc file.'});
+}
+async function openFile(id){
+  var m=FILES.find(function(f){return f.id===id});if(!m)return;
+  var b=null;try{b=await fileBlob(id)}catch(e){}
+  if(!b){toast({title:'Could not open this file',body:'It may have been cleared from this browser.'});return}
+  if(m.ext==='pdf'){
+    if(!window.SKPdfViewer){toast({title:'PDF viewer not loaded',body:'Reload the page and try again.'});return}
+    var u=urlCache[id]||(urlCache[id]=URL.createObjectURL(new Blob([b],{type:'application/pdf'})));
+    SKPdfViewer.open({id:'f:'+id,name:m.name,url:u,downloadUrl:u});
+  }else openDoc(m,b);
+}
+async function shareBlob(b,name,type){
+  var file=new File([b],name,{type:type||b.type});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return}
+  }catch(e){
+    if(e&&e.name==='AbortError')return;
+    if(e&&e.name==='NotAllowedError'){toast({title:'Tap Share again'});return}
+  }
+  var u=URL.createObjectURL(file),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(u)},30000);
+  toast({title:'Sharing is not available here',body:'The file was saved to your downloads instead.'});
+}
+async function shareStored(id){
+  var m=FILES.find(function(f){return f.id===id});if(!m)return;
+  var b=null;try{b=await fileBlob(id)}catch(e){}
+  if(!b){toast({title:'Could not read this file'});return}
+  shareBlob(b,m.name,m.type);
+}
+/* Word reader (.docx is rendered to readable text; older .doc can be shared or downloaded) */
+var docEl=null,docHist=false,docSkip=false,docFocus=null,DVS=[15,17,19,22];
+function closeDoc(){
+  if(!docEl)return;
+  docEl.remove();docEl=null;document.body.style.overflow='';
+  if(docHist){docHist=false;docSkip=true;try{history.back()}catch(e){docSkip=false}}
+  if(docFocus&&document.contains(docFocus)){try{docFocus.focus({preventScroll:true})}catch(e){}}
+  docFocus=null;
+}
+window.addEventListener('popstate',function(){if(docSkip){docSkip=false;return}if(docEl){docHist=false;closeDoc()}});
+function cleanHtml(html){
+  var t=document.createElement('template');t.innerHTML=html;
+  t.content.querySelectorAll('script,iframe,object,embed,style,link').forEach(function(n){n.remove()});
+  t.content.querySelectorAll('*').forEach(function(n){Array.prototype.slice.call(n.attributes).forEach(function(a){if(/^on/i.test(a.name))n.removeAttribute(a.name)})});
+  t.content.querySelectorAll('a[href]').forEach(function(a){
+    if(/^\s*javascript:/i.test(a.getAttribute('href')||''))a.removeAttribute('href');
+    else{a.target='_blank';a.rel='noopener noreferrer'}
+  });
+  return t.innerHTML;
+}
+async function openDoc(m,b){
+  if(docEl)return;
+  docFocus=document.activeElement;
+  var fs=16;try{fs=+localStorage.getItem('dayline.dvfs')||16}catch(e){}
+  var el=document.createElement('div');
+  el.className='dv';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',m.name);
+  el.style.setProperty('--dv-fs',fs+'px');
+  el.innerHTML='<div class="dv-bar"><button class="circ" data-dv="close" aria-label="Close">'+IC.x+'</button><div class="dv-t">'+esc(m.name)+'</div>'
+    +(m.ext==='docx'?'<button class="circ" data-dv="size" aria-label="Text size"><b>Aa</b></button>':'')
+    +'<button class="circ" data-dv="share" aria-label="Share">'+IC.share+'</button></div>'
+    +'<div class="dv-body"><div class="dv-page"><p class="dv-msg">Opening…</p></div></div>';
+  el.addEventListener('click',function(e){
+    var x=e.target.closest('[data-dv]');if(!x)return;
+    var k=x.dataset.dv;
+    if(k==='close')closeDoc();
+    else if(k==='share')shareBlob(b,m.name,m.type);
+    else if(k==='size'){
+      var cur=parseFloat(el.style.getPropertyValue('--dv-fs'))||16,i=DVS.indexOf(cur),n=DVS[(i+1)%DVS.length];
+      el.style.setProperty('--dv-fs',n+'px');try{localStorage.setItem('dayline.dvfs',String(n))}catch(er){}
+    }
+  });
+  document.body.appendChild(el);docEl=el;document.body.style.overflow='hidden';
+  try{history.pushState({dv:1},'');docHist=true}catch(e){}
+  var page=el.querySelector('.dv-page');
+  if(m.ext!=='docx'){
+    page.innerHTML='<p class="dv-msg">A preview is not available for older .doc files.<br>Tap Share to open it in Word or another app.</p>';
+    return;
+  }
+  try{
+    await SKPdfViewer.loadScript(MAMMOTH,function(){return !!window.mammoth});
+    var r=await mammoth.convertToHtml({arrayBuffer:await b.arrayBuffer()});
+    if(docEl!==el)return;
+    page.innerHTML=cleanHtml(r.value)||'<p class="dv-msg">This document is empty.</p>';
+  }catch(e){
+    if(docEl!==el)return;
+    page.innerHTML='<p class="dv-msg">Could not display this document here.<br>Tap Share to open it in another app.</p>';
+  }
+}
 
 /* ---------- events ---------- */
 document.addEventListener('click',function(e){
@@ -973,6 +1215,22 @@ document.addEventListener('click',function(e){
   }
   else if(a==='sync-now'){syncNow({force:true});toast({title:'Syncing'})}
   else if(a==='sync-off')syncOff();
+  else if(a==='theme'){S.settings.theme=d.v;saveQuiet();applyTheme();$$('[data-a="theme"]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===d.v))})}
+  else if(a==='chap-files')toggleChap(d.sid+':'+d.cid);
+  else if(a==='files')openFiles(d.sid,d.cid||'',d.k);
+  else if(a==='files-tab'){if(U.sheet&&U.sheet.kind==='files')openFiles(U.sheet.sid,U.sheet.cid,d.k)}
+  else if(a==='file-add')addFilesPrompt();
+  else if(a==='file-open')openFile(id);
+  else if(a==='file-share')shareStored(id);
+  else if(a==='file-del'){
+    if(!el.dataset.armed){
+      el.dataset.armed='1';el.classList.add('armed');el.textContent='Delete?';
+      setTimeout(function(){if(el.isConnected&&el.dataset.armed){delete el.dataset.armed;el.classList.remove('armed');el.innerHTML=IC.trash}},3500);
+    }else{
+      filesDelWhere(function(x){return x.id===id});render();
+      if(U.sheet&&U.sheet.kind==='files')openFiles(U.sheet.sid,U.sheet.cid,U.sheet.fk);
+    }
+  }
   else if(a==='sheet-type')openSheet(d.v);
   else if(a==='close-sheet')closeSheet();
   else if(a==='delete'){
@@ -989,7 +1247,7 @@ document.addEventListener('toggle',function(e){
   var d=e.target;
   if(d.matches&&d.matches('details[data-sid]')){if(d.open)U.openSubj.add(d.dataset.sid);else U.openSubj.delete(d.dataset.sid)}
 },true);
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!scrim.hidden)closeSheet()});
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(docEl){closeDoc();return}if(window.SKPdfViewer&&SKPdfViewer.isOpen())return;if(!scrim.hidden)closeSheet()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 document.addEventListener('pointerdown',function(){try{if(ac&&ac.state==='suspended')ac.resume()}catch(e){}},{passive:true});
 /* swipe left/right between pages */
@@ -1021,6 +1279,7 @@ render();
 tick();
 if(SY.code)syncNow();
 setInterval(tick,15000);
+filesInit().then(function(){render()});
 })();
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
 </script>
